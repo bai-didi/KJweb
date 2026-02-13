@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>星渊浏览器 - 主页</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        /* 星空背景动画 */
+        .background-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.15;
+        }
+
+        .particle {
+            position: absolute;
+            background: #64b5f6;
+            border-radius: 50%;
+            animation: float 8s ease-in-out infinite;
+            box-shadow: 0 0 10px rgba(100, 181, 246, 0.5);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            33% { transform: translateY(-30px) rotate(120deg); }
+            66% { transform: translateY(15px) rotate(240deg); }
+        }
+
+        .container {
+            text-align: center;
+            max-width: 800px;
+            padding: 2rem;
+            backdrop-filter: blur(15px);
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 25px;
+            border: 1px solid rgba(100, 181, 246, 0.3);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease;
+        }
+
+        .browser-title {
+            font-size: 2.5rem;
+            font-weight: 300;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(45deg, #64b5f6, #42a5f5, #2196f3);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(100, 181, 246, 0.3);
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            opacity: 0.7;
+            margin-bottom: 2rem;
+            letter-spacing: 2px;
+        }
+
+        /* 时间和日期显示 */
+        .time-display {
+            font-size: 3.5rem;
+            font-weight: 200;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+            color: #e3f2fd;
+        }
+
+        .date-display {
+            font-size: 1.2rem;
+            opacity: 0.85;
+            margin-bottom: 2rem;
+            color: #bbdefb;
+        }
+
+        /* 天气组件 */
+        .weather-widget {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem 1.5rem;
+            border-radius: 20px;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(100, 181, 246, 0.3);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .weather-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .weather-temp {
+            font-size: 1.5rem;
+            font-weight: 300;
+        }
+
+        .weather-location {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-top: 0.3rem;
+        }
+
+        /* 搜索框 */
+        .search-container {
+            position: relative;
+            margin: 2rem auto;
+            max-width: 650px;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 1.2rem 1.8rem;
+            font-size: 1.2rem;
+            border: 2px solid rgba(100, 181, 246, 0.3);
+            border-radius: 50px;
+            background: rgba(255, 255, 255, 0.95);
+            color: #1565c0;
+            outline: none;
+            transition: all 0.4s ease;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .search-box:focus {
+            background: white;
+            border-color: #2196f3;
+            box-shadow: 0 10px 30px rgba(33, 150, 243, 0.3);
+            transform: translateY(-3px);
+        }
+
+        .search-box::placeholder {
+            color: #90a4ae;
+        }
+
+        .search-btn {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: linear-gradient(45deg, #1976d2, #2196f3);
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 30px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            font-weight: 500;
+            box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
+        }
+
+        .search-btn:hover {
+            background: linear-gradient(45deg, #1565c0, #1976d2);
+            transform: translateY(-50%) scale(1.08);
+            box-shadow: 0 6px 20px rgba(33, 150, 243, 0.4);
+        }
+
+        /* 特殊功能按钮 */
+        .special-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+
+        .special-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 1rem 2rem;
+            background: linear-gradient(45deg, rgba(100, 181, 246, 0.2), rgba(33, 150, 243, 0.2));
+            border: 2px solid rgba(100, 181, 246, 0.4);
+            border-radius: 20px;
+            text-decoration: none;
+            color: #e3f2fd;
+            transition: all 0.4s ease;
+            font-size: 1.1rem;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+        }
+
+        .special-btn:hover {
+            background: linear-gradient(45deg, rgba(100, 181, 246, 0.3), rgba(33, 150, 243, 0.3));
+            border-color: #2196f3;
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 10px 25px rgba(33, 150, 243, 0.3);
+            text-decoration: none;
+            color: white;
+        }
+
+        .btn-icon {
+            font-size: 1.5rem;
+        }
+
+        /* 快速链接 */
+        .quick-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 1.2rem;
+            margin-top: 3rem;
+        }
+
+        .quick-link {
+            display: block;
+            padding: 1.2rem;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 18px;
+            text-decoration: none;
+            color: #e3f2fd;
+            transition: all 0.4s ease;
+            border: 1px solid rgba(100, 181, 246, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .quick-link:hover {
+            background: rgba(100, 181, 246, 0.15);
+            border-color: rgba(100, 181, 246, 0.4);
+            transform: translateY(-8px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+            text-decoration: none;
+            color: white;
+        }
+
+        .quick-link-icon {
+            font-size: 2.2rem;
+            margin-bottom: 0.8rem;
+            display: block;
+            filter: drop-shadow(0 0 8px rgba(100, 181, 246, 0.3));
+        }
+
+        /* 书签分类 */
+        .bookmarks-section {
+            margin-top: 2.5rem;
+            text-align: left;
+        }
+
+        .bookmarks-title {
+            font-size: 1.3rem;
+            margin-bottom: 1.2rem;
+            opacity: 0.9;
+            color: #bbdefb;
+        }
+
+        .bookmark-category {
+            margin-bottom: 1.8rem;
+        }
+
+        .category-title {
+            font-size: 1.1rem;
+            margin-bottom: 0.8rem;
+            opacity: 0.8;
+            border-bottom: 2px solid rgba(100, 181, 246, 0.4);
+            padding-bottom: 0.5rem;
+            color: #90caf9;
+        }
+
+        .bookmark-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+        }
+
+        .bookmark-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.6rem 1.2rem;
+            border-radius: 25px;
+            text-decoration: none;
+            color: #e3f2fd;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(100, 181, 246, 0.2);
+        }
+
+        .bookmark-item:hover {
+            background: rgba(100, 181, 246, 0.2);
+            border-color: rgba(100, 181, 246, 0.5);
+            transform: scale(1.08);
+            text-decoration: none;
+            color: white;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                margin: 1rem;
+                padding: 1.8rem;
+            }
+
+            .browser-title {
+                font-size: 2rem;
+            }
+
+            .time-display {
+                font-size: 2.8rem;
+            }
+
+            .weather-widget {
+                position: static;
+                margin: 1.5rem auto;
+                width: fit-content;
+            }
+
+            .special-buttons {
+                flex-direction: column;
+                align-items: center;
+                gap: 1rem;
+            }
+
+            .special-btn {
+                width: 100%;
+                max-width: 300px;
+                justify-content: center;
+            }
+
+            .quick-links {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* 星空效果增强 */
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.3; transform: scale(1); }
+            100% { opacity: 1; transform: scale(1.2); }
+        }
+
+        /* 加载进度条 */
+        .loading-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 3px;
+            background: linear-gradient(90deg, #2196f3, #64b5f6);
+            z-index: 1000;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <!-- 加载进度条 -->
+    <div class="loading-bar" id="loadingBar"></div>
+
+    <!-- 星空背景 -->
+    <div class="background-animation" id="backgroundAnimation"></div>
+
+    <!-- 天气组件 -->
+    <div class="weather-widget">
+        <div class="weather-icon">🌤️</div>
+        <div class="weather-temp">22°C</div>
+        <div class="weather-location">北京</div>
+    </div>
+
+    <div class="container" id="mainContainer">
+        <!-- 浏览器标题 -->
+        <h1 class="browser-title">⭐ 星渊浏览器</h1>
+        <p class="subtitle">STAR ABYSS BROWSER - 探索无限可能</p>
+
+        <!-- 时间和日期显示 -->
+        <div class="time-display" id="currentTime">00:00:00</div>
+        <div class="date-display" id="currentDate">2024年1月1日 星期一</div>
+
+        <!-- 特殊功能按钮 -->
+        <div class="special-buttons">
+            <a href="https://xhrs.fun" class="special-btn" target="_blank">
+                <span class="btn-icon">🧭</span>
+                <span>空晶导航页</span>
+            </a>
+            <a href="https://wiki.xhrs.fun" class="special-btn" target="_blank">
+                <span class="btn-icon">📖</span>
+                <span>空晶宇宙 Wiki</span>
+            </a>
+        </div>
+
+        <!-- 搜索框 -->
+        <div class="search-container">
+            <input type="text" class="search-box" placeholder="使用 Bing 搜索或输入网址..." id="searchInput">
+            <button class="search-btn" onclick="performSearch()">🔍 Bing 搜索</button>
+        </div>
+
+        <!-- 快速链接 -->
+        <div class="quick-links">
+            <a href="https://github.com" class="quick-link" target="_blank">
+                <span class="quick-link-icon">🐙</span>
+                GitHub
+            </a>
+            <a href="https://stackoverflow.com" class="quick-link" target="_blank">
+                <span class="quick-link-icon">💡</span>
+                Stack Overflow
+            </a>
+            <a href="https://youtube.com" class="quick-link" target="_blank">
+                <span class="quick-link-icon">📺</span>
+                YouTube
+            </a>
+            <a href="https://twitter.com" class="quick-link" target="_blank">
+                <span class="quick-link-icon">🐦</span>
+                Twitter
+            </a>
+            <a href="https://gmail.com" class="quick-link" target="_blank">
+                <span class="quick-link-icon">📧</span>
+                Gmail
+            </a>
+            <a href="https://drive.google.com" class="quick-link" target="_blank">
+                <span class="quick-link-icon">📁</span>
+                Google Drive
+            </a>
+        </div>
+
+        <!-- 书签分类 -->
+        <div class="bookmarks-section">
+            <h3 class="bookmarks-title">📚 星渊收藏</h3>
+            
+            <div class="bookmark-category">
+                <div class="category-title">🔍 搜索引擎</div>
+                <div class="bookmark-list">
+                    <a href="https://bing.com" class="bookmark-item" target="_blank">Microsoft Bing</a>
+                    <a href="https://google.com" class="bookmark-item" target="_blank">Google</a>
+                    <a href="https://duckduckgo.com" class="bookmark-item" target="_blank">DuckDuckGo</a>
+                </div>
+            </div>
+
+            <div class="bookmark-category">
+                <div class="category-title">🌐 空晶生态</div>
+                <div class="bookmark-list">
+                    <a href="https://xhrs.fun" class="bookmark-item" target="_blank">空晶导航</a>
+                    <a href="https://wiki.xhrs.fun" class="bookmark-item" target="_blank">空晶 Wiki</a>
+                    <a href="https://github.com/xhrs" class="bookmark-item" target="_blank">空晶 GitHub</a>
+                </div>
+            </div>
+
+            <div class="bookmark-category">
+                <div class="category-title">💻 开发工具</div>
+                <div class="bookmark-list">
+                    <a href="https://codepen.io" class="bookmark-item" target="_blank">CodePen</a>
+                    <a href="https://jsfiddle.net" class="bookmark-item" target="_blank">JSFiddle</a>
+                    <a href="https://repl.it" class="bookmark-item" target="_blank">Repl.it</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 页面加载进度条
+        window.addEventListener('load', function() {
+            const loadingBar = document.getElementById('loadingBar');
+            loadingBar.style.width = '100%';
+            
+            setTimeout(() => {
+                loadingBar.style.opacity = '0';
+                setTimeout(() => {
+                    loadingBar.style.display = 'none';
+                }, 500);
+            }, 500);
+
+            // 主容器淡入动画
+            const container = document.getElementById('mainContainer');
+            setTimeout(() => {
+                container.style.opacity = '1';
+                container.style.transform = 'translateY(0)';
+            }, 300);
+        });
+
+        // 更新时间显示
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('zh-CN', { hour12: false });
+            const dateString = now.toLocaleDateString('zh-CN', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric', 
+                weekday: 'long' 
+            });
+            
+            document.getElementById('currentTime').textContent = timeString;
+            document.getElementById('currentDate').textContent = dateString;
+        }
+
+        // 每秒更新时间
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // Bing搜索功能
+        function performSearch() {
+            const query = document.getElementById('searchInput').value.trim();
+            if (query) {
+                if (query.includes('.') && !query.includes(' ')) {
+                    window.open(query.startsWith('http') ? query : 'https://' + query, '_blank');
+                } else {
+                    window.open('https://www.bing.com/search?q=' + encodeURIComponent(query), '_blank');
+                }
+            }
+        }
+
+        // 回车键搜索
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+
+        // 创建动态背景粒子
+        function createParticles() {
+            const container = document.getElementById('backgroundAnimation');
+            const particleCount = 60;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                const size = Math.random() * 5 + 3;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 8 + 's';
+                particle.style.animationDuration = (Math.random() * 4 + 4) + 's';
+                
+                container.appendChild(particle);
+            }
+        }
+
+        // 创建星星效果
+        function createStars() {
+            const container = document.getElementById('backgroundAnimation');
+            const starCount = 30;
+
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                
+                const size = Math.random() * 3 + 1;
+                star.style.width = size + 'px';
+                star.style.height = size + 'px';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                
+                container.appendChild(star);
+            }
+        }
+
+        // 初始化
+        createParticles();
+        createStars();
+
+        // 模拟天气数据更新
+        function updateWeather() {
+            const weatherIcons = ['☀️', '🌤️', '⛅', '🌥️', '☁️', '🌦️', '🌧️', '⛈️', '🌩️', '❄️'];
+            const locations = ['北京', '上海', '广州', '深圳', '成都', '杭州', '武汉', '西安'];
+            const temp = Math.floor(Math.random() * 30) + 5;
+            
+            document.querySelector('.weather-icon').textContent = weatherIcons[Math.floor(Math.random() * weatherIcons.length)];
+            document.querySelector('.weather-temp').textContent = temp + '°C';
+            document.querySelector('.weather-location').textContent = locations[Math.floor(Math.random() * locations.length)];
+        }
+
+        // 每30分钟更新一次天气
+        updateWeather();
+        setInterval(updateWeather, 1800000);
+
+        // 鼠标移动视差效果
+        document.addEventListener('mousemove', function(e) {
+            const particles = document.querySelectorAll('.particle, .star');
+            const x = e.clientX / window.innerWidth;
+            const y = e.clientY / window.innerHeight;
+            
+            particles.forEach((particle, index) => {
+                const speed = (index % 5 + 1) * 0.5;
+                const xMove = (x - 0.5) * speed;
+                const yMove = (y - 0.5) * speed;
+                particle.style.transform += ` translate(${xMove}px, ${yMove}px)`;
+            });
+        });
+    </script>
+</body>
+</html>
